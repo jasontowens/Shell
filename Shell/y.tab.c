@@ -84,7 +84,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "syntaxTree.c"
+#include "syntaxTree.h"
+
+
  
 void yyerror(const char *str)
 {
@@ -96,6 +98,8 @@ int yywrap()
 
         return 1;
 } 
+
+int yylex();
 
 
 
@@ -119,14 +123,14 @@ int yywrap()
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 20 "grammar.y"
+#line 24 "grammar.y"
 {
   int number;
   char* string;
   struct command* command;
 }
 /* Line 193 of yacc.c.  */
-#line 130 "y.tab.c"
+#line 134 "y.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -139,7 +143,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 143 "y.tab.c"
+#line 147 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -422,7 +426,7 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    37,    37,    38,    39,    41,    44
+       0,    41,    41,    42,    43,    45,    48
 };
 #endif
 
@@ -1319,37 +1323,37 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 37 "grammar.y"
+#line 41 "grammar.y"
     {}
     break;
 
   case 3:
-#line 38 "grammar.y"
+#line 42 "grammar.y"
     {}
     break;
 
   case 4:
-#line 39 "grammar.y"
+#line 43 "grammar.y"
     {}
     break;
 
   case 5:
-#line 41 "grammar.y"
+#line 45 "grammar.y"
     {
-                        
+                      myCommand->commandName = yylval.string;  
                 }
     break;
 
   case 6:
-#line 44 "grammar.y"
+#line 48 "grammar.y"
     {
-                         
+                      myCommand->arguments->args[0] = yylval.string;
                 }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1353 "y.tab.c"
+#line 1357 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1563,5 +1567,5 @@ yyreturn:
 }
 
 
-#line 48 "grammar.y"
+#line 52 "grammar.y"
 

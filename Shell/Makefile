@@ -1,5 +1,5 @@
-all: y.tab.o lex.yy.o main.o syntaxTree.o
-	cc lex.yy.o y.tab.o main.o syntaxTree.o -o main -g
+all: syntaxTree.o y.tab.o lex.yy.o main.o 
+	gcc -o main syntaxTree.o lex.yy.o y.tab.o main.o 
 
 y.tab.h: grammar.y
 	yacc -dv grammar.y
@@ -8,7 +8,7 @@ y.tab.c: grammar.y
 	yacc -dv grammar.y
 
 y.tab.o: y.tab.h y.tab.c
-	cc -c y.tab.c -g
+	cc -c y.tab.c 
 
 lex.yy.c: tokens.l
 	lex tokens.l
@@ -21,3 +21,6 @@ syntaxTree.o: syntaxTree.c
 
 main.o: main.c
 	cc -c main.c -g
+
+clean:
+	rm -f *.o main syntaxTree lex.yy y.tab

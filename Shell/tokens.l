@@ -1,12 +1,12 @@
 %{
 #include <stdio.h>
 #include "y.tab.h"
-#include "syntaxTree.c"
+#include "syntaxTree.h"
 %}
 %%
 \n {
 	return EOL; }
-[A-Za-z]+    { yylval.string = strdup(yytext); 
+[A-Za-z.]+    { yylval.string = strdup(yytext); 
 				return WORD; }
 
 [0-9]		{ yylval.number = atoi(yytext); 

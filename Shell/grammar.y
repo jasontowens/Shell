@@ -1,7 +1,9 @@
 %{
 #include <stdio.h>
 #include <string.h>
-#include "syntaxTree.c"
+#include "syntaxTree.h"
+
+
  
 void yyerror(const char *str)
 {
@@ -13,6 +15,8 @@ int yywrap()
 
         return 1;
 } 
+
+int yylex();
 
 %}
 
@@ -39,10 +43,10 @@ real_command :  single_command EOL{}
             |   EOL {}
 
 single_command : WORD {
-                        
+                      myCommand->commandName = yylval.string;  
                 }
                 | single_command WORD{
-                         
+                      myCommand->arguments->args[0] = yylval.string;
                 }
 
 %%

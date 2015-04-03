@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "syntaxTree.h"
 #include "y.tab.h"
-#include "syntaxTree.c"
+
 #define OK 0
 #define BYE 1
 #define ERROR 2
@@ -11,42 +12,30 @@ extern char yytext[];
 extern int yy_scan_string(const char *);
 
 char line[500];
-struct command* real_command;
 
 int getCommand(){
-
-	switch(yyparse()){
-		case 0:
-		
-			printf("yayyy\n");
-
-		case 1:
-			printf("booo\n");
+	fgets(line,sizeof(line),stdin);
+	yy_scan_string(line);
+	if(yyparse()){
+		return ERROR;
+	}else{
+		return OK;
 	}
-
-
-
 }
 int main( int argc, const char* argv[] )
 {
-	real_command = yylval.command;
-	
-	while(1)
+	myCommand = (COMMAND *)malloc(sizeof(COMMAND));
+	myCommand->arguments = (ARGUMENTS *)malloc(sizeof(ARGUMENTS));
+	int continueLoop = 1;
+	while(continueLoop)
 	{	
 		printf("nicebackend>");
-		//fgets(line,sizeof(line),stdin);
-		//yy_scan_string(line);
-		if(yyparse()){
-				printf("booo\n");
-		}else{
-				printf("yayyy\n");
-		}
-		//if(cool){
-			//printf("%s\n", yylval);
-			//printf("boo\n");
-
-		//}else{
-			//printf("yay\n");
-		//}
+		switch(getCommand()){
+			case OK:
+				continueLoop = performCommand(myCommand);
+			break;
+			case ERROR:
+			break;
+		}	
 	}
 }
