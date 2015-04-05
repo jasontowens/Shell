@@ -42,11 +42,15 @@ real_command :  single_command EOL{}
             |   real_command EOL{}
             |   EOL {}
 
-single_command : WORD {
-                      myCommand->commandName = yylval.string;  
+single_command : WORD { 
+                         
+                        myCommand->arguments->args[0] = yylval.string;
+                        myCommand->numArgs++;
+                        
                 }
                 | single_command WORD{
-                      myCommand->arguments->args[0] = yylval.string;
+                      myCommand->arguments->args[myCommand->numArgs] = yylval.string;
+                      myCommand->numArgs++;
                 }
 
 %%

@@ -426,7 +426,7 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    41,    41,    42,    43,    45,    48
+       0,    41,    41,    42,    43,    45,    51
 };
 #endif
 
@@ -1339,21 +1339,25 @@ yyreduce:
 
   case 5:
 #line 45 "grammar.y"
-    {
-                      myCommand->commandName = yylval.string;  
+    { 
+                         
+                        myCommand->arguments->args[0] = yylval.string;
+                        myCommand->numArgs++;
+                        
                 }
     break;
 
   case 6:
-#line 48 "grammar.y"
+#line 51 "grammar.y"
     {
-                      myCommand->arguments->args[0] = yylval.string;
+                      myCommand->arguments->args[myCommand->numArgs] = yylval.string;
+                      myCommand->numArgs++;
                 }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1357 "y.tab.c"
+#line 1361 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1567,5 +1571,5 @@ yyreturn:
 }
 
 
-#line 52 "grammar.y"
+#line 56 "grammar.y"
 
