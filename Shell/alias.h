@@ -38,7 +38,7 @@ typedef struct alias {
 extern int numAlias;
 int addMyAlias(char* name , char* value, int globbed);
 void printAlias();
-void fixAlias(COMMAND* command);
+int fixAlias(COMMAND* command);
 char* fixWord(char* word);
 extern HASH_TABLE *aliases;
 extern void initialize_aliases();

@@ -33,6 +33,12 @@ printf("sadf\n");
  			}
  			addMyAlias(myGlobCommand->arguments->args[1],myCommand->arguments->args[2],1);
  			return 1;
+ 		}else if(strcmp(command,"setenv") == 0){
+ 			int yay = setenv(myGlobCommand->arguments->args[1],myGlobCommand->arguments->args[2],1);
+ 			return 1;
+ 		}else if(strcmp(command,"unsetenv") == 0){
+ 			unsetenv(myGlobCommand->arguments->args[1]);
+ 			return 1;
  		}
  		char words[500];
  		char* arg;
@@ -40,6 +46,7 @@ printf("sadf\n");
  			printf("%s\n",myGlobCommand->arguments->args[i]);
  			if(fixWord(myGlobCommand->arguments->args[i]) != NULL){
  				arg = fixWord(myCommand->arguments->args[i]);
+
  			}else{
  				arg = myGlobCommand->arguments->args[i];
  			}

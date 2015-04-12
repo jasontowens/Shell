@@ -232,10 +232,11 @@ char* fixWord(char* word){
 	}
 	return returnword;
 }
-void fixAlias(COMMAND* command){
+int fixAlias(COMMAND* command){
 	int j = 0;
 	char* myargs[MAXARGS];
 	char* argu;
+	alias_t* ali;
 	for(int i = 0; i!= command->numArgs;++i){
 		argu = get_alias_value(command->arguments->args[i]);
 		printf("argument:%s\n",argu);
@@ -243,8 +244,19 @@ void fixAlias(COMMAND* command){
 			myargs[j] = command->arguments->args[i];
 			++j;
 		}else{
+			ali = find_alias(command->arguments->args[i]);
+			if(ali->glob == 1){
+				return -2;
+			}
 			while(get_alias_value(argu) != NULL){
+				printf("daglob%s\n",get_alias_value(argu));
+
+				ali = find_alias(argu);
+				printf("daglob%d\n",ali->glob);
 				argu = get_alias_value(argu);
+				if(ali->glob == 1){
+					return -2;
+				}
 			}
 			printf("argument:%s\n",argu);
 			char * pch;
@@ -267,7 +279,7 @@ void fixAlias(COMMAND* command){
 	command->numArgs = l;
 	command->arguments->args[l] = NULL;
 	
-
+return 1;
 }
 
 
