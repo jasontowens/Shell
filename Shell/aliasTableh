@@ -1,0 +1,13 @@
+typedef struct alias{
+	char* temp_command;
+	ARGUMENTS* arguments;
+	int numArgs;
+}MYALIAS;
+
+typedef struct aliasTable{
+	MYALIAS** aliasTable;
+	int numAlias;
+}ALIASTABLE;
+
+
+extern ALIASTABLE* _aliasTable;

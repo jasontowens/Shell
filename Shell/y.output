@@ -1,6 +1,15 @@
 Terminals which are not used
 
+   ALIAS
+   UNALIAS
    NUMBER
+   PRINTENV
+
+
+State 5 conflicts: 1 shift/reduce
+State 6 conflicts: 2 shift/reduce
+State 18 conflicts: 2 shift/reduce
+State 25 conflicts: 2 shift/reduce
 
 
 Grammar
@@ -8,98 +17,301 @@ Grammar
     0 $accept: real_command $end
 
     1 real_command: single_command EOL
-    2             | real_command EOL
-    3             | EOL
+    2             | single_command
+    3             | real_command EOL
+    4             | real_command REDIRECT EOL
+    5             | piping_command
+    6             | piping_command REDIRECT
+    7             | EOL
 
-    4 single_command: WORD
-    5               | single_command WORD
+    8 single_command: WORD
+    9               | VARIABLE
+   10               | single_command WORD
+   11               | single_command QUOTED
+   12               | single_command VARIABLE
+
+   13 piping_command: single_command PIPE
+   14               | piping_command single_command
+   15               | piping_command PIPE single_command
+
+   16 REDIRECT: INPUT QUOTED
+   17         | OUTPUT QUOTED
+   18         | INPUT WORD
+   19         | OUTPUT WORD
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
 error (256)
-EOL (258) 1 2 3
-WORD (259) 4 5
-NUMBER (260)
+EOL (258) 1 3 4 7
+VARIABLE (259) 9 12
+WORD (260) 8 10 18 19
+ALIAS (261)
+UNALIAS (262)
+QUOTED (263) 11 16 17
+NUMBER (264)
+PIPE (265) 13 15
+PRINTENV (266)
+INPUT (267) 16 18
+OUTPUT (268) 17 19
 
 
 Nonterminals, with rules where they appear
 
-$accept (6)
+$accept (14)
     on left: 0
-real_command (7)
-    on left: 1 2 3, on right: 0 2
-single_command (8)
-    on left: 4 5, on right: 1 5
+real_command (15)
+    on left: 1 2 3 4 5 6 7, on right: 0 3 4
+single_command (16)
+    on left: 8 9 10 11 12, on right: 1 2 10 11 12 13 14 15
+piping_command (17)
+    on left: 13 14 15, on right: 5 6 14 15
+REDIRECT (18)
+    on left: 16 17 18 19, on right: 4 6
 
 
 state 0
 
     0 $accept: . real_command $end
 
-    EOL   shift, and go to state 1
-    WORD  shift, and go to state 2
+    EOL       shift, and go to state 1
+    VARIABLE  shift, and go to state 2
+    WORD      shift, and go to state 3
 
-    real_command    go to state 3
-    single_command  go to state 4
+    real_command    go to state 4
+    single_command  go to state 5
+    piping_command  go to state 6
 
 
 state 1
 
-    3 real_command: EOL .
+    7 real_command: EOL .
 
-    $default  reduce using rule 3 (real_command)
+    $default  reduce using rule 7 (real_command)
 
 
 state 2
 
-    4 single_command: WORD .
+    9 single_command: VARIABLE .
 
-    $default  reduce using rule 4 (single_command)
+    $default  reduce using rule 9 (single_command)
 
 
 state 3
 
-    0 $accept: real_command . $end
-    2 real_command: real_command . EOL
+    8 single_command: WORD .
 
-    $end  shift, and go to state 5
-    EOL   shift, and go to state 6
+    $default  reduce using rule 8 (single_command)
 
 
 state 4
 
-    1 real_command: single_command . EOL
-    5 single_command: single_command . WORD
+    0 $accept: real_command . $end
+    3 real_command: real_command . EOL
+    4             | real_command . REDIRECT EOL
 
-    EOL   shift, and go to state 7
-    WORD  shift, and go to state 8
+    $end    shift, and go to state 7
+    EOL     shift, and go to state 8
+    INPUT   shift, and go to state 9
+    OUTPUT  shift, and go to state 10
+
+    REDIRECT  go to state 11
 
 
 state 5
+
+    1 real_command: single_command . EOL
+    2             | single_command .
+   10 single_command: single_command . WORD
+   11               | single_command . QUOTED
+   12               | single_command . VARIABLE
+   13 piping_command: single_command . PIPE
+
+    EOL       shift, and go to state 12
+    VARIABLE  shift, and go to state 13
+    WORD      shift, and go to state 14
+    QUOTED    shift, and go to state 15
+    PIPE      shift, and go to state 16
+
+    EOL       [reduce using rule 2 (real_command)]
+    $default  reduce using rule 2 (real_command)
+
+
+state 6
+
+    5 real_command: piping_command .
+    6             | piping_command . REDIRECT
+   14 piping_command: piping_command . single_command
+   15               | piping_command . PIPE single_command
+
+    VARIABLE  shift, and go to state 2
+    WORD      shift, and go to state 3
+    PIPE      shift, and go to state 17
+    INPUT     shift, and go to state 9
+    OUTPUT    shift, and go to state 10
+
+    INPUT     [reduce using rule 5 (real_command)]
+    OUTPUT    [reduce using rule 5 (real_command)]
+    $default  reduce using rule 5 (real_command)
+
+    single_command  go to state 18
+    REDIRECT        go to state 19
+
+
+state 7
 
     0 $accept: real_command $end .
 
     $default  accept
 
 
-state 6
+state 8
 
-    2 real_command: real_command EOL .
+    3 real_command: real_command EOL .
 
-    $default  reduce using rule 2 (real_command)
+    $default  reduce using rule 3 (real_command)
 
 
-state 7
+state 9
+
+   16 REDIRECT: INPUT . QUOTED
+   18         | INPUT . WORD
+
+    WORD    shift, and go to state 20
+    QUOTED  shift, and go to state 21
+
+
+state 10
+
+   17 REDIRECT: OUTPUT . QUOTED
+   19         | OUTPUT . WORD
+
+    WORD    shift, and go to state 22
+    QUOTED  shift, and go to state 23
+
+
+state 11
+
+    4 real_command: real_command REDIRECT . EOL
+
+    EOL  shift, and go to state 24
+
+
+state 12
 
     1 real_command: single_command EOL .
 
     $default  reduce using rule 1 (real_command)
 
 
-state 8
+state 13
 
-    5 single_command: single_command WORD .
+   12 single_command: single_command VARIABLE .
 
-    $default  reduce using rule 5 (single_command)
+    $default  reduce using rule 12 (single_command)
+
+
+state 14
+
+   10 single_command: single_command WORD .
+
+    $default  reduce using rule 10 (single_command)
+
+
+state 15
+
+   11 single_command: single_command QUOTED .
+
+    $default  reduce using rule 11 (single_command)
+
+
+state 16
+
+   13 piping_command: single_command PIPE .
+
+    $default  reduce using rule 13 (piping_command)
+
+
+state 17
+
+   15 piping_command: piping_command PIPE . single_command
+
+    VARIABLE  shift, and go to state 2
+    WORD      shift, and go to state 3
+
+    single_command  go to state 25
+
+
+state 18
+
+   10 single_command: single_command . WORD
+   11               | single_command . QUOTED
+   12               | single_command . VARIABLE
+   14 piping_command: piping_command single_command .
+
+    VARIABLE  shift, and go to state 13
+    WORD      shift, and go to state 14
+    QUOTED    shift, and go to state 15
+
+    VARIABLE  [reduce using rule 14 (piping_command)]
+    WORD      [reduce using rule 14 (piping_command)]
+    $default  reduce using rule 14 (piping_command)
+
+
+state 19
+
+    6 real_command: piping_command REDIRECT .
+
+    $default  reduce using rule 6 (real_command)
+
+
+state 20
+
+   18 REDIRECT: INPUT WORD .
+
+    $default  reduce using rule 18 (REDIRECT)
+
+
+state 21
+
+   16 REDIRECT: INPUT QUOTED .
+
+    $default  reduce using rule 16 (REDIRECT)
+
+
+state 22
+
+   19 REDIRECT: OUTPUT WORD .
+
+    $default  reduce using rule 19 (REDIRECT)
+
+
+state 23
+
+   17 REDIRECT: OUTPUT QUOTED .
+
+    $default  reduce using rule 17 (REDIRECT)
+
+
+state 24
+
+    4 real_command: real_command REDIRECT EOL .
+
+    $default  reduce using rule 4 (real_command)
+
+
+state 25
+
+   10 single_command: single_command . WORD
+   11               | single_command . QUOTED
+   12               | single_command . VARIABLE
+   15 piping_command: piping_command PIPE single_command .
+
+    VARIABLE  shift, and go to state 13
+    WORD      shift, and go to state 14
+    QUOTED    shift, and go to state 15
+
+    VARIABLE  [reduce using rule 15 (piping_command)]
+    WORD      [reduce using rule 15 (piping_command)]
+    $default  reduce using rule 15 (piping_command)

@@ -67,14 +67,30 @@
       know about them.  */
    enum yytokentype {
      EOL = 258,
-     WORD = 259,
-     NUMBER = 260
+     VARIABLE = 259,
+     WORD = 260,
+     ALIAS = 261,
+     UNALIAS = 262,
+     QUOTED = 263,
+     NUMBER = 264,
+     PIPE = 265,
+     PRINTENV = 266,
+     INPUT = 267,
+     OUTPUT = 268
    };
 #endif
 /* Tokens.  */
 #define EOL 258
-#define WORD 259
-#define NUMBER 260
+#define VARIABLE 259
+#define WORD 260
+#define ALIAS 261
+#define UNALIAS 262
+#define QUOTED 263
+#define NUMBER 264
+#define PIPE 265
+#define PRINTENV 266
+#define INPUT 267
+#define OUTPUT 268
 
 
 
@@ -83,8 +99,18 @@
 #line 1 "grammar.y"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include "alias.h"
 #include "syntaxTree.h"
+#include "pipe.h"
+
+
+#include <unistd.h> 
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 
  
@@ -123,14 +149,14 @@ int yylex();
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 24 "grammar.y"
+#line 34 "grammar.y"
 {
   int number;
   char* string;
   struct command* command;
 }
 /* Line 193 of yacc.c.  */
-#line 134 "y.tab.c"
+#line 160 "y.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -143,7 +169,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 147 "y.tab.c"
+#line 173 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -356,22 +382,22 @@ union yyalloc
 #endif
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  5
+#define YYFINAL  7
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   5
+#define YYLAST   31
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  6
+#define YYNTOKENS  14
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  3
+#define YYNNTS  5
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  6
+#define YYNRULES  20
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  9
+#define YYNSTATES  26
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   260
+#define YYMAXUTOK   268
 
 #define YYTRANSLATE(YYX)						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -405,7 +431,7 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5
+       5,     6,     7,     8,     9,    10,    11,    12,    13
 };
 
 #if YYDEBUG
@@ -413,20 +439,28 @@ static const yytype_uint8 yytranslate[] =
    YYRHS.  */
 static const yytype_uint8 yyprhs[] =
 {
-       0,     0,     3,     6,     9,    11,    13
+       0,     0,     3,     6,     8,    11,    15,    17,    20,    22,
+      24,    26,    29,    32,    35,    38,    41,    45,    48,    51,
+      54
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-       7,     0,    -1,     8,     3,    -1,     7,     3,    -1,     3,
-      -1,     4,    -1,     8,     4,    -1
+      15,     0,    -1,    16,     3,    -1,    16,    -1,    15,     3,
+      -1,    15,    18,     3,    -1,    17,    -1,    17,    18,    -1,
+       3,    -1,     5,    -1,     4,    -1,    16,     5,    -1,    16,
+       8,    -1,    16,     4,    -1,    16,    10,    -1,    17,    16,
+      -1,    17,    10,    16,    -1,    12,     8,    -1,    13,     8,
+      -1,    12,     5,    -1,    13,     5,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    41,    41,    42,    43,    45,    51
+       0,    59,    59,    60,    61,    62,    63,    64,    65,    69,
+      77,    84,    91,    98,   106,   125,   139,   157,   167,   177,
+     196
 };
 #endif
 
@@ -435,8 +469,10 @@ static const yytype_uint8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "EOL", "WORD", "NUMBER", "$accept",
-  "real_command", "single_command", 0
+  "$end", "error", "$undefined", "EOL", "VARIABLE", "WORD", "ALIAS",
+  "UNALIAS", "QUOTED", "NUMBER", "PIPE", "PRINTENV", "INPUT", "OUTPUT",
+  "$accept", "real_command", "single_command", "piping_command",
+  "REDIRECT", 0
 };
 #endif
 
@@ -445,20 +481,25 @@ static const char *const yytname[] =
    token YYLEX-NUM.  */
 static const yytype_uint16 yytoknum[] =
 {
-       0,   256,   257,   258,   259,   260
+       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
+     265,   266,   267,   268
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,     6,     7,     7,     7,     8,     8
+       0,    14,    15,    15,    15,    15,    15,    15,    15,    16,
+      16,    16,    16,    16,    17,    17,    17,    18,    18,    18,
+      18
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     2,     2,     1,     1,     2
+       0,     2,     2,     1,     2,     3,     1,     2,     1,     1,
+       1,     2,     2,     2,     2,     2,     3,     2,     2,     2,
+       2
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -466,27 +507,31 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     4,     5,     0,     0,     1,     3,     2,     6
+       0,     8,    10,     9,     0,     3,     6,     1,     4,     0,
+       0,     0,     2,    13,    11,    12,    14,     0,    15,     7,
+      19,    17,    20,    18,     5,    16
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     3,     4
+      -1,     4,     5,     6,    11
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -3
+#define YYPACT_NINF -4
 static const yytype_int8 yypact[] =
 {
-      -2,    -3,    -3,     0,     1,    -3,    -3,    -3,    -3
+      26,    -4,    -4,    -4,     0,    13,    -3,    -4,    -4,     3,
+      14,    11,    -4,    -4,    -4,    -4,    -4,     1,    20,    -4,
+      -4,    -4,    -4,    -4,    -4,    20
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -3,    -3,    -3
+      -4,    -4,    -2,    -4,    21
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -496,19 +541,27 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-       5,     1,     2,     6,     7,     8
+       7,     2,     3,     8,    18,     2,     3,    17,    20,     9,
+      10,    21,     9,    10,    24,    25,    12,    13,    14,    22,
+       0,    15,    23,    16,    13,    14,     0,    19,    15,     1,
+       2,     3
 };
 
-static const yytype_uint8 yycheck[] =
+static const yytype_int8 yycheck[] =
 {
-       0,     3,     4,     3,     3,     4
+       0,     4,     5,     3,     6,     4,     5,    10,     5,    12,
+      13,     8,    12,    13,     3,    17,     3,     4,     5,     5,
+      -1,     8,     8,    10,     4,     5,    -1,     6,     8,     3,
+       4,     5
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,     4,     7,     8,     0,     3,     3,     4
+       0,     3,     4,     5,    15,    16,    17,     0,     3,    12,
+      13,    18,     3,     4,     5,     8,    10,    10,    16,    18,
+       5,     8,     5,     8,     3,    16
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1323,41 +1376,231 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 41 "grammar.y"
+#line 59 "grammar.y"
     {}
     break;
 
   case 3:
-#line 42 "grammar.y"
+#line 60 "grammar.y"
     {}
     break;
 
   case 4:
-#line 43 "grammar.y"
+#line 61 "grammar.y"
     {}
     break;
 
   case 5:
-#line 45 "grammar.y"
-    { 
-                         
-                        myCommand->arguments->args[0] = yylval.string;
-                        myCommand->numArgs++;
-                        
-                }
+#line 62 "grammar.y"
+    {}
     break;
 
   case 6:
-#line 51 "grammar.y"
+#line 63 "grammar.y"
+    {}
+    break;
+
+  case 7:
+#line 64 "grammar.y"
+    {}
+    break;
+
+  case 8:
+#line 65 "grammar.y"
+    {
+                type = NONE;
+              }
+    break;
+
+  case 9:
+#line 69 "grammar.y"
+    { 
+                     myCommand->arguments->args[myCommand->numArgs] = yylval.string;
+                     myCommand->numArgs++;
+                     myGlobCommand->arguments->args[myGlobCommand->numArgs] = yylval.string;
+                     myGlobCommand->numArgs++;
+                     type = REGULAR;  
+                }
+    break;
+
+  case 10:
+#line 77 "grammar.y"
+    { 
+                     myCommand->arguments->args[myCommand->numArgs] = yylval.string;
+                     myCommand->numArgs++;
+                     myGlobCommand->arguments->args[myGlobCommand->numArgs] = yylval.string;
+                     myGlobCommand->numArgs++;
+                     type = REGULAR;  
+                }
+    break;
+
+  case 11:
+#line 84 "grammar.y"
     {
                       myCommand->arguments->args[myCommand->numArgs] = yylval.string;
                       myCommand->numArgs++;
+                      myGlobCommand->arguments->args[myGlobCommand->numArgs] = yylval.string;
+                      myGlobCommand->numArgs++;
+                      type = REGULAR;
                 }
+    break;
+
+  case 12:
+#line 91 "grammar.y"
+    {
+                      myCommand->arguments->args[myCommand->numArgs] = yylval.string;
+                      myCommand->numArgs++;
+                      myGlobCommand->arguments->args[myGlobCommand->numArgs] = yylval.string;
+                      myGlobCommand->numArgs++;
+                      type = REGULAR;
+                }
+    break;
+
+  case 13:
+#line 98 "grammar.y"
+    {
+                      char* variableName = yylval.string;
+                      myCommand->arguments->args[myCommand->numArgs] = getenv(variableName);
+                      myCommand->numArgs++;
+                      myGlobCommand->arguments->args[myGlobCommand->numArgs] = getenv(variableName);
+                      myGlobCommand->numArgs++;
+                      type = REGULAR;
+                }
+    break;
+
+  case 14:
+#line 106 "grammar.y"
+    {//This will always be first
+                   printf("first\n");
+                
+                  pipingTable->pipes[pipingTable->numPipes].command->arguments = myCommand->arguments;
+                  pipingTable->pipes[pipingTable->numPipes].command->numArgs = myCommand->numArgs;
+                  free(myCommand->arguments);
+                  free(myCommand);
+                  myCommand = (COMMAND *)malloc(sizeof(COMMAND));
+                  myCommand->arguments = (ARGUMENTS *)malloc(sizeof(ARGUMENTS));
+                  myCommand->numArgs = 0;
+                  
+
+                  myGlobCommand->arguments->args[myGlobCommand->numArgs] = "|";
+                  myGlobCommand->numArgs++;
+                
+                  pipingTable->numPipes++;
+                  type = PIPES;
+                }
+    break;
+
+  case 15:
+#line 125 "grammar.y"
+    {//This will always be first
+                  //fix
+                  printf("second\n");
+                  pipingTable->pipes[pipingTable->numPipes].command->arguments = myCommand->arguments;
+                  pipingTable->pipes[pipingTable->numPipes].command->numArgs = myCommand->numArgs;
+                  free(myCommand->arguments);
+                  free(myCommand);
+                  myCommand = (COMMAND *)malloc(sizeof(COMMAND));
+                  myCommand->arguments = (ARGUMENTS *)malloc(sizeof(ARGUMENTS));
+                  pipingTable->numPipes++;
+                  myCommand->numArgs = 0;
+                  type = PIPES;
+                }
+    break;
+
+  case 16:
+#line 139 "grammar.y"
+    {//This will always be first
+                  //fix
+                  printf("third\n");
+                  pipingTable->pipes[pipingTable->numPipes].command->arguments = myCommand->arguments;
+                  pipingTable->pipes[pipingTable->numPipes].command->numArgs = myCommand->numArgs;
+                  free(myCommand->arguments);
+                  free(myCommand);
+                  myCommand = (COMMAND *)malloc(sizeof(COMMAND));
+                  myCommand->arguments = (ARGUMENTS *)malloc(sizeof(ARGUMENTS));
+
+                  myGlobCommand->arguments->args[myGlobCommand->numArgs] = "|";
+                  myGlobCommand->numArgs++;
+
+                  pipingTable->numPipes++;
+                  myCommand->numArgs = 0;
+                  type = PIPES;
+                }
+    break;
+
+  case 17:
+#line 157 "grammar.y"
+    { 
+              printf("input\n");
+              file_input = 1;
+              myCommand->inputFile = yylval.string;
+              myGlobCommand->arguments->args[myGlobCommand->numArgs] = "<";
+              myGlobCommand->numArgs++;
+              myGlobCommand->arguments->args[myGlobCommand->numArgs] = yylval.string;
+              myGlobCommand->numArgs++;
+            }
+    break;
+
+  case 18:
+#line 167 "grammar.y"
+    {
+                 printf("output\n");
+              file_output = 1;
+              myCommand->outputFile = yylval.string;
+              myGlobCommand->arguments->args[myGlobCommand->numArgs] = ">";
+              myGlobCommand->numArgs++;
+              myGlobCommand->arguments->args[myGlobCommand->numArgs] = yylval.string;
+              myGlobCommand->numArgs++;
+            }
+    break;
+
+  case 19:
+#line 177 "grammar.y"
+    { 
+              printf("input\n");
+              file_input = 1;
+              char* fixed = fixWord(yylval.string);
+              if(fixed != NULL){
+                 myCommand->inputFile = fixed;
+                 myGlobCommand->arguments->args[myGlobCommand->numArgs] = ">";
+                 myGlobCommand->numArgs++;
+                 myGlobCommand->arguments->args[myGlobCommand->numArgs] = yylval.string;
+                 myGlobCommand->numArgs++;
+              }else{
+                myCommand->inputFile = yylval.string;
+                myGlobCommand->arguments->args[myGlobCommand->numArgs] = ">";
+                myGlobCommand->numArgs++;
+                myGlobCommand->arguments->args[myGlobCommand->numArgs] = yylval.string;
+                myGlobCommand->numArgs++;
+              }
+            }
+    break;
+
+  case 20:
+#line 196 "grammar.y"
+    {
+                 printf("output\n");
+              file_output = 1;
+               char* fixed = fixWord(yylval.string);
+              if(fixed != NULL){
+                 myCommand->outputFile = fixed;
+                 myGlobCommand->arguments->args[myGlobCommand->numArgs] = ">";
+                 myGlobCommand->numArgs++;
+                 myGlobCommand->arguments->args[myGlobCommand->numArgs] = yylval.string;
+                 myGlobCommand->numArgs++;
+              }else{
+                myCommand->inputFile = yylval.string;
+                myGlobCommand->arguments->args[myGlobCommand->numArgs] = ">";
+                myGlobCommand->numArgs++;
+                myGlobCommand->arguments->args[myGlobCommand->numArgs] = yylval.string;
+                myGlobCommand->numArgs++;
+              }
+            }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1361 "y.tab.c"
+#line 1604 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1571,5 +1814,5 @@ yyreturn:
 }
 
 
-#line 56 "grammar.y"
+#line 216 "grammar.y"
 

@@ -40,28 +40,44 @@
       know about them.  */
    enum yytokentype {
      EOL = 258,
-     WORD = 259,
-     NUMBER = 260
+     VARIABLE = 259,
+     WORD = 260,
+     ALIAS = 261,
+     UNALIAS = 262,
+     QUOTED = 263,
+     NUMBER = 264,
+     PIPE = 265,
+     PRINTENV = 266,
+     INPUT = 267,
+     OUTPUT = 268
    };
 #endif
 /* Tokens.  */
 #define EOL 258
-#define WORD 259
-#define NUMBER 260
+#define VARIABLE 259
+#define WORD 260
+#define ALIAS 261
+#define UNALIAS 262
+#define QUOTED 263
+#define NUMBER 264
+#define PIPE 265
+#define PRINTENV 266
+#define INPUT 267
+#define OUTPUT 268
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 24 "grammar.y"
+#line 34 "grammar.y"
 {
   int number;
   char* string;
   struct command* command;
 }
 /* Line 1529 of yacc.c.  */
-#line 65 "y.tab.h"
+#line 81 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
